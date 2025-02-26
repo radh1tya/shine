@@ -126,15 +126,30 @@ handle_connection(void) {
         }
 
         if (FD_ISSET(STDIN_FILENO, &readfds)) {
+            char command[512];
+
             fgets(shell, sizeof(shell), stdin);
             shell[strcspn(shell, "\n")] = '\0';
             printf("debug: %s\n", shell);
 
             if(strncmp(shell, "/join ", 6) == 0) {
-                char command[512];
                 snprintf(command, sizeof(command), "JOIN %s\r\n", shell+6);
                 write(client_socket, command, strlen(command));
-            } else if (strcmp(shell, "/quit") == 0) {
+            }
+
+            else if (strncmp(shell, "/msg ", 5) == 0) {
+                char *target = shell + 5;
+                char *msg_start = strchr(target, ' ');
+
+                if (msg_start) {
+                    *msg_start = '\0';
+                    msg_start++;
+                    snprintf(command, sizeof(command), "PRIVMSG %s :%s\r\n", target, msg_start);
+                    write(client_socket, command, strlen(command));
+                }
+            }
+
+            else if (strcmp(shell, "/quit") == 0) {
                 return;
             }
         }
