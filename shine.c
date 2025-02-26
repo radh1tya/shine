@@ -9,12 +9,14 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-char nama_server[100];
+int client_socket;
 
 void
 connect_domain(void)
 {
-    int client_socket = socket(AF_INET, SOCK_STREAM, 0);
+    char nama_server[50];
+
+    client_socket = socket(AF_INET, SOCK_STREAM, 0);
 
     struct sockaddr_in address;
     address.sin_family = AF_INET;
@@ -39,13 +41,35 @@ connect_domain(void)
     }
 
     printf("Berhasil konek ke %s\n", nama_server);
+}
 
-    close(client_socket);
+void
+identity(void)
+{
+    char nickname[15];
+    char irc_nickname[50];
+
+    printf("nickname:\n");
+    fgets(nickname, sizeof(nickname), stdin);
+    snprintf(irc_nickname, 50, "NICK %s\r\n", nickname);
+
+    char username[15];
+    char irc_username[50];
+
+    printf("username:\n");
+    
+    fgets(username, sizeof(username), stdin);
+    snprintf(irc_username, 50, "USER %s 0 * :linux\r\n", username);
+
+    /* send nickname & username */
+    write(client_socket, irc_nickname, strlen(irc_nickname));
+    write(client_socket, irc_username, strlen(irc_username));
 }
 
 int
 main(void)
 {
     connect_domain();
+    identity();
     return 0;
 }

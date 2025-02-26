@@ -1,5 +1,5 @@
 CC=cc
-IN=src/shine.c
+IN=shine.c
 OUT=shine
 
 install:
